@@ -64,15 +64,7 @@ class VK:
             print(response)
             return
 
-        with open('data.txt', 'w') as file:
-            # for item in response['response']['items']:
-            #     print('item===', item)
-            #     photo_set = set()
-            #     photo = self._get_biggest_size_photo_url(item['sizes'], item['likes'])
-            #     photo_set.add(photo['file_name'])
-            #     if photos not in photo_set:
-            #         photo['file_name'] = f'{photo['file_name']}'
-            #         photos.append(photo)  
+        with open('data.txt', 'w') as file: 
             photos = self._get_biggest_size_photo_url(response['response']['items'])
             json.dump(photos, file, sort_keys = True, indent = 2, ensure_ascii = False)     
         return photos
