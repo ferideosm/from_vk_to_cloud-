@@ -37,6 +37,8 @@ class Ya():
 
     def upload(self, photos, folder_name):
         folder = self._create_new_folder(folder_name)
+        check_log = False       
+
         if folder:
             headers = self._get_headers()
             url = f'{self.url}/v1/disk/resources/upload'
@@ -44,23 +46,27 @@ class Ya():
 
             with open('log.txt', 'a') as file:
                 for photo in photos:
-
                     time.sleep(2)
                     params = {
                         'path': f"{folder_name}/{photo['file_name']}",
                         'url': photo['url']
                         }
                     response = requests.post(url, headers=headers, params=params)  
-
+                    date = datetime.now()
                     if response.status_code == 202:                                      
-                        del photo['url']
-                        date = datetime.now()
+                        del photo['url']                        
                         photo['upload_datetime'] = date.strftime('%Y-%d-%m %H:%M:%S')
                         photo['sourse'] = 'vk'
                         bar.next()       
-                        json.dump(photo, file, sort_keys = True, indent = 2, ensure_ascii = False)
+                        # json.dump(photo, file, sort_keys = True, indent = 2, ensure_ascii = False)
                     else:
-                        print(response.text)
+                        photo['error'] = response.text
+                        photo['upload_datetime'] = date.strftime('%Y-%d-%m %H:%M:%S')
+                        photo['sourse'] = 'vk'  
+                        check_log = True          
+                    json.dump(photo, file, sort_keys = True, indent = 2, ensure_ascii = False)
 
             bar.finish()
+            if check_log:
+                print("Please, check log. The operation ended with an errors")
 

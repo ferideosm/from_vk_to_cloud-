@@ -1,5 +1,6 @@
 import requests
 import json
+import datetime
 
 class VK:
 
@@ -19,24 +20,37 @@ class VK:
         params['extended'] = 1
         return params
 
-    def _get_biggest_size_photo_url(self, items, likes):
-        max_width = 0
-        max_height = 0
-        for item in items:
-            if item['width'] > max_width:
-                max_width = item['width']
+    def _get_biggest_size_photo_url(self, items):
 
-        for item in items:
-            if item['width']  == max_width and item['height'] > max_height:
-                max_height = item['height']  
-                url = item['url']
+        photo_set = set() 
+        photos = []
 
-        photo = {
-            'size': item['type'],
-            'url': url,
-            'file_name': f"{likes['count']}.jpg"}
+        for item in items:                     
+            max_width = 0
+            max_height = 0
+            for i in item['sizes']:
+                if i['width'] > max_width:
+                    max_width = i['width']
 
-        return photo
+            for i in item['sizes']:
+                if i['width']  == max_width and i['height'] > max_height:
+                    max_height = i['height']  
+                    url = i['url']
+
+            if item['likes']['count'] in photo_set:
+                date = datetime.datetime.fromtimestamp(item['date'])
+                file_name = f"{item['likes']['count']}_{date:%Y-%m-%d-%H-%M-%S}.jpg"
+            else:
+                photo_set.add(item['likes']['count'])
+                file_name =  f"{item['likes']['count']}.jpg"
+
+            photo = {
+                'size': i['type'],
+                'url': url,
+                'file_name': file_name }
+            photos.append(photo)  
+
+        return photos
 
 
     def get_photo(self):
@@ -45,16 +59,22 @@ class VK:
         params = self.photo_params()
         response = requests.get(url, params=params).json()
        
-        photos = []
+        
         if response.get('error'):
             print(response)
             return
 
         with open('data.txt', 'w') as file:
-            for item in response['response']['items']:
-                photo = self._get_biggest_size_photo_url(item['sizes'], item['likes'])
-                photos.append(photo)  
-                json.dump(photo, file, sort_keys = True, indent = 2, ensure_ascii = False)     
+            # for item in response['response']['items']:
+            #     print('item===', item)
+            #     photo_set = set()
+            #     photo = self._get_biggest_size_photo_url(item['sizes'], item['likes'])
+            #     photo_set.add(photo['file_name'])
+            #     if photos not in photo_set:
+            #         photo['file_name'] = f'{photo['file_name']}'
+            #         photos.append(photo)  
+            photos = self._get_biggest_size_photo_url(response['response']['items'])
+            json.dump(photos, file, sort_keys = True, indent = 2, ensure_ascii = False)     
         return photos
        
 
