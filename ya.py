@@ -12,7 +12,6 @@ class Ya():
         self.token = token
         self.url = 'https://cloud-api.yandex.net'
 
-
     def _get_headers(self):
         return {
             'Authorization': f'OAuth {self.token}',
@@ -26,10 +25,10 @@ class Ya():
         res = requests.put(url, headers=headers, params=params)
 
         if res.status_code == 201:
-            print("Folder created!")
+            print("Folder created on Yandex Disk!")
             return res.status_code
         elif res.status_code == 409:
-            print("Folder exists!")
+            print("Folder exists on Yandex Disk!")
             return res.status_code
         else:
             print(res.text)
@@ -42,7 +41,7 @@ class Ya():
         if folder:
             headers = self._get_headers()
             url = f'{self.url}/v1/disk/resources/upload'
-            bar = IncrementalBar('Progress', max = len(photos))
+            bar = IncrementalBar('Upload to Yandex', max = len(photos))
 
             with open('log.txt', 'a') as file:
                 for photo in photos:
@@ -56,13 +55,13 @@ class Ya():
                     if response.status_code == 202:                                      
                         del photo['url']                        
                         photo['upload_datetime'] = date.strftime('%Y-%d-%m %H:%M:%S')
-                        photo['sourse'] = 'vk'
+                        photo['to'] = 'ya_disk'  
                         bar.next()       
-                        # json.dump(photo, file, sort_keys = True, indent = 2, ensure_ascii = False)
+                        json.dump(photo, file, sort_keys = True, indent = 2, ensure_ascii = False)
                     else:
                         photo['error'] = response.text
-                        photo['upload_datetime'] = date.strftime('%Y-%d-%m %H:%M:%S')
-                        photo['sourse'] = 'vk'  
+                        photo['upload_datetime'] = date.strftime('%Y-%d-%m %H:%M:%S')                        
+                        photo['to'] = 'ya_disk'  
                         check_log = True          
                     json.dump(photo, file, sort_keys = True, indent = 2, ensure_ascii = False)
 

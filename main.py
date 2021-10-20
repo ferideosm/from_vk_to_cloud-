@@ -1,8 +1,11 @@
+
 from vk import VK
 from ya import Ya
+
 import pathlib
 from pathlib import Path
 import requests
+from ggle import Ggle
 
 
 version_vk = '5.131'
@@ -30,8 +33,12 @@ if __name__ == "__main__":
 
     vk = VK(token_vk, version_vk)
     ya = Ya(token_ya)
-    photos = vk.get_photo()
+    go = Ggle()
+    photos = vk.get_photo()   
+
     if photos:
-        ya.upload(photos, 'New folder')    
+        folder = 'Upload files from VK'
+        ya.upload(photos, folder)   
+        go.upload_photos(folder) 
 
         

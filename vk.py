@@ -1,6 +1,8 @@
 import requests
 import json
 import datetime
+import os
+import time
 
 class VK:
 
@@ -47,9 +49,23 @@ class VK:
             photo = {
                 'size': i['type'],
                 'url': url,
-                'file_name': file_name }
-            photos.append(photo)  
+                'file_name': file_name,
+                'sourse': 'vk'}
+   
 
+            # save photos localy
+            if not os.path.isdir("Files"):                  
+                os.mkdir("Files")
+                time.sleep(5)
+
+            file_folder = os.path.abspath("Files")            
+            img_data = requests.get(url).content            
+            path = f"{file_folder}/{photo['file_name']}"
+            with open(path, 'wb') as handler:
+                handler.write(img_data)
+
+            
+            photos.append(photo)  
         return photos
 
 
